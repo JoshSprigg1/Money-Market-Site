@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tools — Money Market</title>
+  <meta name="description" content="Plain-English money tools. Start with the compound growth calculator: see what regular investing actually turns into.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ---------- Tools / calculator page ---------- */
+    .calc {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+    @media (max-width: 880px) { .calc { grid-template-columns: 1fr; } }
+
+    .calc__form {
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 18px;
+      padding: 28px;
+      position: sticky;
+      top: 90px;
+    }
+    @media (max-width: 880px) { .calc__form { position: static; } }
+
+    .calc__form h3 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 22px;
+      margin: 0 0 18px;
+      letter-spacing: -.01em;
+    }
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--mint-deep);
+      margin-bottom: 6px;
+    }
+    .field .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field .input-wrap:focus-within { border-color: var(--mint); box-shadow: 0 0 0 3px rgba(43,212,169,.18); }
+    .field .input-wrap .prefix,
+    .field .input-wrap .suffix {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--slate);
+      padding: 0 12px;
+    }
+    .field input, .field select {
+      flex: 1;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 12px 12px;
+      font: inherit;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 15px;
+    }
+    .field input.no-prefix { padding-left: 14px; }
+    .field select { font-family: var(--body); }
+    .field__hint { font-size: 12px; color: var(--slate); margin-top: 6px; }
+
+    .calc__form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .reset {
+      background: transparent; color: var(--slate);
+      border: 0; border-bottom: 1px solid var(--rule);
+      font-family: var(--mono); font-size: 12px;
+      letter-spacing: .08em; text-transform: uppercase;
+      cursor: pointer; padding: 4px 0;
+    }
+    .reset:hover { color: var(--mint-deep); border-color: var(--mint); }
+
+    /* Results */
+    .calc__results { display: flex; flex-direction: column; gap: 28px; }
+
+    .result-cards {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    }
+    @media (max-width: 700px) { .result-cards { grid-template-columns: 1fr; } }
+    .result-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .result-card--hero {
+      background: var(--ink); color: var(--paper);
+      border-color: var(--ink);
+      grid-column: 1 / -1;
+    }
+    .result-card .label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--slate);
+    }
+    .result-card--hero .label { color: #8c98ad; }
+    .result-card .value {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 30px;
+      margin-top: 6px;
+      letter-spacing: -.01em;
+    }
+    .result-card--hero .value { font-size: 44px; color: var(--paper); }
+    .result-card .sub {
+      font-family: var(--mono); font-size: 12px; color: var(--slate); margin-top: 4px;
+    }
+    .result-card--hero .sub { color: #8c98ad; }
+    .result-card .value .frac { color: var(--mint); }
+
+    /* Chart */
+    .chart-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .chart-card h3 {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 20px;
+      margin: 0 0 4px;
+      letter-spacing: -.005em;
+    }
+    .chart-card .chart-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 18px;
+    }
+    .legend { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; font-size: 13px; color: var(--ink-soft); }
+    .legend span { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; }
+    .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+    .sw-contrib { background: var(--gold); }
+    .sw-interest { background: var(--mint); }
+    .sw-start { background: var(--ink-soft); }
+
+    .chart-wrap { width: 100%; position: relative; }
+    .chart-wrap svg { width: 100%; height: auto; display: block; }
+    .chart-wrap .tip {
+      position: absolute;
+      pointer-events: none;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transform: translate(-50%, -100%);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .12s;
+      box-shadow: 0 6px 20px -8px rgba(14,23,38,0.5);
+    }
+    .chart-wrap .tip.show { opacity: 1; }
+    .chart-wrap .tip b { color: var(--mint); font-weight: 600; }
+
+    /* Table */
+    .breakdown {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 6px 22px 22px;
+      overflow-x: auto;
+    }
+    .breakdown h3 {
+      font-family: var(--display); font-weight: 600;
+      font-size: 20px; margin: 18px 0 6px;
+    }
+    .breakdown .chart-sub {
+      font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--slate); margin-bottom: 14px;
+    }
+    .breakdown table { width: 100%; border-collapse: collapse; }
+    .breakdown th, .breakdown td {
+      padding: 10px 8px; text-align: right;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono); font-size: 14px;
+    }
+    .breakdown th {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--slate); font-weight: 600;
+      border-bottom: 2px solid var(--ink);
+      text-align: right;
+    }
+    .breakdown th:first-child, .breakdown td:first-child { text-align: left; }
+    .breakdown tbody tr:hover { background: var(--paper-2); }
+
+    /* Plain English explainer */
+    .explainer {
+      background: var(--paper-2);
+      border-left: 4px solid var(--mint);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-top: 36px;
+    }
+    .explainer__label {
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--mint-deep); margin-bottom: 8px; display: block;
+    }
+    .explainer h3 {
+      font-family: var(--display); font-weight: 700;
+      font-size: 22px; margin: 0 0 10px; letter-spacing: -.01em;
+    }
+    .explainer p { color: var(--ink-soft); margin: 0 0 12px; font-size: 16px; }
+    .explainer p:last-child { margin-bottom: 0; }
+    .explainer .formula {
+      font-family: var(--mono); font-size: 13px; color: var(--ink-soft);
+      background: var(--paper); border: 1px solid var(--rule);
+      padding: 10px 14px; border-radius: 8px; display: inline-block; margin-top: 4px;
+    }
+
+    /* Other tools placeholder */
+    .more-tools { margin-top: 56px; }
+    .more-tools .card--soon { opacity: .85; }
+    .more-tools .card--soon .card__chip { background: var(--paper-2); color: var(--slate); }
+
+    /* Tool switcher (sibling nav) */
+    .tool-switch {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .tool-switch a {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      color: var(--ink-soft);
+    }
+    .tool-switch a:hover { color: var(--mint-deep); border-color: var(--mint); }
+    .tool-switch a.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  </style>
+</head>
+<body>
+
+  <!-- Mock ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+      <span>JEPI <b class="flat">$57.21 ◆ 0.02%</b></span>
+      <span>SCHD <b class="up">$28.94 ▲ 0.21%</b></span>
+      <span>VOO <b class="up">$498.10 ▲ 0.59%</b></span>
+      <span>SOL <b class="down">$162.40 ▼ 2.10%</b></span>
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html">
+        <span class="brand__dot"></span>Money Market
+        <span class="brand__tag">est. 2026</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="etfs.html">ETFs</a>
+        <a href="stocks.html">Stocks</a>
+        <a href="crypto.html">Crypto</a>
+        <a href="tools.html" class="active">Tools</a>
+        <a href="about.html">About</a>
+      </nav>
+      <a class="btn" href="index.html#newsletter">Subscribe</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="category-hero">
+    <div class="wrap">
+      <span class="chip">Tools // Compound Growth</span>
+      <h1>What does <em style="font-style: italic; color: var(--mint-deep);">your money</em> turn into?</h1>
+      <p>
+        Plug in a starting amount, a monthly contribution, and how long you can leave it alone.
+        The math does the rest — and shows you, year by year, how much of your future balance is
+        money you put in vs. money your money made.
+      </p>
+    </div>
+  </section>
+
+  <!-- Calculator -->
+  <section class="wrap section">
+
+    <!-- Sibling tool switcher -->
+    <div class="tool-switch">
+      <a href="tools.html" class="active">Compound growth</a>
+      <a href="etf-overlap.html">ETF overlap</a>
+    </div>
+
+    <div class="calc">
+      <!-- Form -->
+      <form class="calc__form" id="calc-form" autocomplete="off">
+        <h3>Compound Growth Calculator</h3>
+
+        <div class="field">
+          <label for="principal">Starting amount</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="text" id="principal" inputmode="numeric" value="1,000" data-money>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="contribution">Monthly contribution</label>
+          <div class="input-wrap">
+            <span class="prefix">$</span>
+            <input type="text" id="contribution" inputmode="numeric" value="500" data-money>
+          </div>
+          <div class="field__hint">What you add every month, on autopilot.</div>
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label for="rate">Annual return</label>
+            <div class="input-wrap">
+              <input type="number" id="rate" class="no-prefix" min="-20" max="50" step="0.1" value="7" inputmode="decimal">
+              <span class="suffix">%</span>
+            </div>
+          </div>
+          <div class="field">
+            <label for="years">Years</label>
+            <div class="input-wrap">
+              <input type="number" id="years" class="no-prefix" min="1" max="60" step="1" value="30" inputmode="numeric">
+              <span class="suffix">yrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="compounding">Compounding</label>
+          <div class="input-wrap">
+            <select id="compounding">
+              <option value="12" selected>Monthly</option>
+              <option value="4">Quarterly</option>
+              <option value="1">Annually</option>
+            </select>
+          </div>
+          <div class="field__hint">Monthly is the standard assumption for most index-fund math.</div>
+        </div>
+
+        <button type="button" class="reset" id="reset-btn">↺ Reset to defaults</button>
+      </form>
+
+      <!-- Results -->
+      <div class="calc__results">
+        <div class="result-cards">
+          <div class="result-card result-card--hero">
+            <div class="label">Final balance</div>
+            <div class="value" id="r-final">$0</div>
+            <div class="sub" id="r-final-sub">after 0 years at 0%</div>
+          </div>
+          <div class="result-card">
+            <div class="label">You put in</div>
+            <div class="value" id="r-contrib">$0</div>
+            <div class="sub" id="r-contrib-sub">across 0 months</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Interest earned</div>
+            <div class="value" id="r-interest">$0</div>
+            <div class="sub" id="r-interest-sub">aka, the magic part</div>
+          </div>
+          <div class="result-card">
+            <div class="label">Money your money made</div>
+            <div class="value"><span id="r-ratio">0×</span></div>
+            <div class="sub">interest ÷ contributions</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <h3>Growth over time</h3>
+          <div class="chart-sub">Stacked: starting amount · contributions · interest</div>
+          <div class="legend">
+            <span><i class="swatch sw-start"></i> Starting amount</span>
+            <span><i class="swatch sw-contrib"></i> Contributions</span>
+            <span><i class="swatch sw-interest"></i> Interest</span>
+          </div>
+          <div class="chart-wrap" id="chart-wrap">
+            <svg id="chart" viewBox="0 0 800 320" preserveAspectRatio="none" aria-label="Growth chart"></svg>
+            <div class="tip" id="chart-tip"></div>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <h3>Year-by-year breakdown</h3>
+          <div class="chart-sub">End-of-year balances</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Contributions</th>
+                <th>Interest</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody id="breakdown-body"></tbody>
+          </table>
+        </div>
+
+        <div class="explainer">
+          <span class="explainer__label">Plain English</span>
+          <h3>What this is actually doing</h3>
+          <p>
+            Each period, your balance earns the periodic interest rate (annual ÷ periods), then your
+            contribution gets added on top. Repeat that for every month for thirty years and the
+            curve goes from "boring straight line" to "wait, what?" That bend is compounding.
+          </p>
+          <p>
+            The formula, if you're into that sort of thing:
+            <span class="formula">FV = P(1+r)^n + PMT · ((1+r)^n − 1) ÷ r</span>
+          </p>
+          <p style="font-size: 13px; color: var(--slate); margin-top: 14px;">
+            Heads up: this assumes a constant return, which real markets do not provide. It's a planning tool, not a prediction. Nothing here is investment advice.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- More tools -->
+    <div class="more-tools">
+      <div class="section__head">
+        <h2 class="section__title">More tools <small>// THE TOOLBOX</small></h2>
+      </div>
+      <div class="grid grid--3">
+        <article class="card">
+          <span class="card__chip card__chip--etf">Live</span>
+          <h3 class="card__title"><a href="etf-overlap.html">ETF overlap tool</a></h3>
+          <p class="card__dek">Pick two ETFs, see how much they actually share. Stop "diversifying" by buying Apple, Microsoft, and Nvidia three times.</p>
+          <div class="card__meta">Try it →</div>
+        </article>
+        <article class="card card--soon">
+          <span class="card__chip">Soon</span>
+          <h3 class="card__title">Inflation-adjusted return calculator</h3>
+          <p class="card__dek">Because a 7% nominal return and a 7% real return are very different animals.</p>
+          <div class="card__meta">In the works</div>
+        </article>
+        <article class="card card--soon">
+          <span class="card__chip">Soon</span>
+          <h3 class="card__title">401(k) match optimizer</h3>
+          <p class="card__dek">How much do you need to contribute to capture the full match? (Spoiler: probably more than you think.)</p>
+          <div class="card__meta">In the works</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="index.html"><span class="brand__dot"></span>Money Market</a>
+        <p>Twice-weekly market reads for people who want to understand the money, not just chase it.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Topics</h4>
+        <ul>
+          <li><a href="etfs.html">ETFs</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="crypto.html">Crypto</a></li>
+          <li><a href="tools.html">Tools</a></li>
+          <li><a href="#">Plain English</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The publication</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#voice">How we write</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+          <li><a href="index.html#newsletter">Newsletter</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The fine print</h4>
+        <ul>
+          <li><a href="about.html#disclosure">Disclosure</a></li>
+          <li><a href="about.html#methodology">How we source</a></li>
+          <li><a href="about.html#corrections">Corrections</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap footer__legal">
+      <span>© 2026 Money Market. Nothing here is investment advice.</span>
+      <span>Made for people, not portfolios.</span>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => '$' + Math.round(n).toLocaleString('en-US');
+  const fmtK = (n) => {
+    const abs = Math.abs(n);
+    if (abs >= 1e6) return '$' + (n/1e6).toFixed(n >= 10e6 ? 0 : 1) + 'M';
+    if (abs >= 1e3) return '$' + (n/1e3).toFixed(n >= 10e3 ? 0 : 1) + 'k';
+    return '$' + Math.round(n);
+  };
+
+  const defaults = { principal: 1000, contribution: 500, rate: 7, years: 30, compounding: 12 };
+
+  // Strip commas + non-numeric chars for parsing
+  const parseMoney = (s) => {
+    if (s == null) return 0;
+    const cleaned = String(s).replace(/[^\d.]/g, '');
+    return parseFloat(cleaned) || 0;
+  };
+
+  // Format an integer with thousand-separator commas
+  const withCommas = (n) => {
+    if (n == null || isNaN(n)) return '';
+    return Math.round(n).toLocaleString('en-US');
+  };
+
+  function read() {
+    const p = parseMoney($('principal').value);
+    const c = parseMoney($('contribution').value);
+    const r = parseFloat($('rate').value) || 0;
+    const y = Math.max(1, Math.min(60, parseInt($('years').value, 10) || 1));
+    const m = parseInt($('compounding').value, 10) || 12;
+    return { p, c, r, y, m };
+  }
+
+  // Simulate period-by-period. Monthly contributions accumulate in a "pending
+  // cash" bucket until the next compounding event. At that point, interest is
+  // credited on the EXISTING balance (not on the pending cash), then the
+  // pending cash is rolled into the balance. This matches how less-frequent
+  // compounding actually works: deposits made mid-period don't retroactively
+  // earn that period's interest.
+  function simulate({ p, c, r, y, m }) {
+    const months = y * 12;
+    const annualRate = r / 100;
+    const compoundEvery = 12 / m;
+    const periodicRate = annualRate / m;
+    let balance = p;
+    let pendingCash = 0;
+    let totalContrib = 0;
+    let totalInterest = 0;
+    const yearly = [];
+    let yearContrib = 0;
+    let yearInterest = 0;
+
+    for (let month = 1; month <= months; month++) {
+      pendingCash += c;
+      totalContrib += c;
+      yearContrib += c;
+
+      if (month % compoundEvery === 0) {
+        const interest = balance * periodicRate;
+        balance += interest + pendingCash;
+        pendingCash = 0;
+        totalInterest += interest;
+        yearInterest += interest;
+      }
+
+      if (month % 12 === 0) {
+        yearly.push({
+          year: month / 12,
+          contrib: yearContrib,
+          interest: yearInterest,
+          balance: balance + pendingCash,
+        });
+        yearContrib = 0;
+        yearInterest = 0;
+      }
+    }
+    balance += pendingCash;
+    return { balance, totalContrib, totalInterest, yearly, months };
+  }
+
+  function renderResults(state, sim) {
+    $('r-final').textContent = fmt(sim.balance);
+    $('r-final-sub').textContent = 'after ' + state.y + ' year' + (state.y === 1 ? '' : 's') + ' at ' + state.r + '%';
+    $('r-contrib').textContent = fmt(state.p + sim.totalContrib);
+    $('r-contrib-sub').textContent = state.p > 0
+      ? '$' + Math.round(state.p).toLocaleString() + ' start + ' + sim.months + ' monthly deposits'
+      : 'across ' + sim.months + ' monthly deposits';
+    $('r-interest').textContent = fmt(sim.totalInterest);
+    $('r-interest-sub').textContent = 'aka, the magic part';
+    const contribTotal = state.p + sim.totalContrib;
+    const ratio = contribTotal > 0 ? sim.totalInterest / contribTotal : 0;
+    $('r-ratio').textContent = ratio.toFixed(2) + 'x';
+  }
+
+  function renderBreakdown(state, sim) {
+    const tbody = $('breakdown-body');
+    let html = '';
+    let cumContrib = state.p;
+    let cumInterest = 0;
+    html += '<tr><td>Start</td><td>' + fmt(state.p) + '</td><td>-</td><td>' + fmt(state.p) + '</td></tr>';
+    sim.yearly.forEach(row => {
+      cumContrib += row.contrib;
+      cumInterest += row.interest;
+      html += '<tr>'
+        + '<td>Year ' + row.year + '</td>'
+        + '<td>' + fmt(cumContrib) + '</td>'
+        + '<td style="color: var(--mint-deep);">' + fmt(cumInterest) + '</td>'
+        + '<td><b>' + fmt(row.balance) + '</b></td>'
+        + '</tr>';
+    });
+    tbody.innerHTML = html;
+  }
+
+  function renderChart(state, sim) {
+    const svg = $('chart');
+    const W = 800, H = 320;
+    const padL = 56, padR = 16, padT = 16, padB = 28;
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const points = [{ x: 0, start: state.p, contrib: 0, interest: 0, balance: state.p }];
+    let cumContrib = 0, cumInterest = 0;
+    sim.yearly.forEach((row, i) => {
+      cumContrib += row.contrib;
+      cumInterest += row.interest;
+      points.push({
+        x: i + 1,
+        start: state.p,
+        contrib: cumContrib,
+        interest: cumInterest,
+        balance: row.balance
+      });
+    });
+    const maxY = Math.max(state.p, sim.balance, 1);
+    const xMax = state.y;
+    const xScale = (x) => padL + (x / xMax) * innerW;
+    const yScale = (v) => padT + innerH - (v / maxY) * innerH;
+    const startTop = points.map(p => xScale(p.x) + ',' + yScale(p.start));
+    const startBottom = xScale(xMax) + ',' + yScale(0) + ' ' + xScale(0) + ',' + yScale(0);
+    const contribTop = points.map(p => xScale(p.x) + ',' + yScale(p.start + p.contrib));
+    const interestTop = points.map(p => xScale(p.x) + ',' + yScale(p.start + p.contrib + p.interest));
+    const startArea = 'M ' + startTop.join(' L ') + ' L ' + startBottom + ' Z';
+    const contribArea = 'M ' + contribTop.join(' L ') + ' L ' + startTop.slice().reverse().join(' L ') + ' Z';
+    const interestArea = 'M ' + interestTop.join(' L ') + ' L ' + contribTop.slice().reverse().join(' L ') + ' Z';
+    const ticks = 4;
+    let axisHtml = '';
+    for (let i = 0; i <= ticks; i++) {
+      const v = (maxY * i) / ticks;
+      const y = yScale(v);
+      axisHtml += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="#E4DCC9" stroke-width="1"' + (i===0?'':' stroke-dasharray="2 4"') + '/>';
+      axisHtml += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" font-family="JetBrains Mono, monospace" font-size="11" fill="#5B6678" text-anchor="end">' + fmtK(v) + '</text>';
+    }
+    const xTickCount = Math.min(state.y, 6);
+    const xStep = state.y / xTickCount;
+    for (let i = 0; i <= xTickCount; i++) {
+      const v = Math.round(i * xStep);
+      const x = xScale(v);
+      axisHtml += '<text x="' + x + '" y="' + (H - 8) + '" font-family="JetBrains Mono, monospace" font-size="11" fill="#5B6678" text-anchor="middle">Y' + v + '</text>';
+    }
+    let markers = '';
+    points.forEach((p, i) => {
+      markers += '<circle data-idx="' + i + '" cx="' + xScale(p.x) + '" cy="' + yScale(p.start + p.contrib + p.interest) + '" r="14" fill="transparent" />';
+    });
+    svg.innerHTML = axisHtml
+      + '<path d="' + startArea + '" fill="#2A3445" opacity="0.55"/>'
+      + '<path d="' + contribArea + '" fill="#E0B14A" opacity="0.85"/>'
+      + '<path d="' + interestArea + '" fill="#2BD4A9" opacity="0.85"/>'
+      + '<polyline points="' + interestTop.join(' ') + '" fill="none" stroke="#0F8E6E" stroke-width="2"/>'
+      + markers;
+
+    const tip = $('chart-tip');
+    const wrap = $('chart-wrap');
+    svg.querySelectorAll('circle').forEach(c => {
+      c.addEventListener('mouseenter', () => {
+        const idx = parseInt(c.dataset.idx, 10);
+        const p = points[idx];
+        const rect = wrap.getBoundingClientRect();
+        const cx = parseFloat(c.getAttribute('cx'));
+        const cy = parseFloat(c.getAttribute('cy'));
+        const scale = rect.width / W;
+        tip.style.left = (cx * scale) + 'px';
+        tip.style.top = (cy * scale - 6) + 'px';
+        tip.innerHTML = 'Year ' + p.x + ' &middot; <b>' + fmt(p.balance) + '</b><br>Contrib ' + fmt(p.start + p.contrib) + ' &middot; Interest ' + fmt(p.interest);
+        tip.classList.add('show');
+      });
+      c.addEventListener('mouseleave', () => tip.classList.remove('show'));
+    });
+  }
+
+  function update() {
+    const state = read();
+    const sim = simulate(state);
+    renderResults(state, sim);
+    renderBreakdown(state, sim);
+    renderChart(state, sim);
+  }
+
+  // Live comma-formatter for money inputs. Preserves cursor position by
+  // counting digits to the left of the caret before/after reformatting.
+  function attachMoneyFormatter(input) {
+    input.addEventListener('input', (e) => {
+      const el = e.target;
+      const oldValue = el.value;
+      const oldCaret = el.selectionStart || 0;
+      const digitsLeft = (oldValue.slice(0, oldCaret).match(/\d/g) || []).length;
+      const digits = oldValue.replace(/[^\d]/g, '');
+      const formatted = digits === '' ? '' : parseInt(digits, 10).toLocaleString('en-US');
+      el.value = formatted;
+      let newCaret = 0, seen = 0;
+      for (let i = 0; i < formatted.length && seen < digitsLeft; i++) {
+        if (/\d/.test(formatted[i])) seen++;
+        newCaret = i + 1;
+      }
+      try { el.setSelectionRange(newCaret, newCaret); } catch (err) {}
+    });
+    input.addEventListener('focus', () => input.select());
+  }
+
+  // Initialize money inputs with comma formatting
+  document.querySelectorAll('input[data-money]').forEach(attachMoneyFormatter);
+
+  // Wire up update on every input
+  ['principal','contribution','rate','years','compounding'].forEach(id => {
+    $(id).addEventListener('input', update);
+    $(id).addEventListener('change', update);
+  });
+
+  $('reset-btn').addEventListener('click', () => {
+    $('principal').value = withCommas(defaults.principal);
+    $('contribution').value = withCommas(defaults.contribution);
+    $('rate').value = defaults.rate;
+    $('years').value = defaults.years;
+    $('compounding').value = defaults.compounding;
+    update();
+  });
+
+  window.addEventListener('resize', () => {
+    const state = read();
+    const sim = simulate(state);
+    renderChart(state, sim);
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>

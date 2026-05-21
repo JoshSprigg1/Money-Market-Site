@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Money Market — Markets, explained like a friend who actually knows.</title>
+  <meta name="description" content="Twice-weekly takes on ETFs, stocks, and crypto for people who want to actually understand what's happening — not just nod along.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Mock ticker (decorative). Sample data only, see disclosure. -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+      <span>JEPI <b class="flat">$57.21 ◆ 0.02%</b></span>
+      <span>SCHD <b class="up">$28.94 ▲ 0.21%</b></span>
+      <span>VOO <b class="up">$498.10 ▲ 0.59%</b></span>
+      <span>SOL <b class="down">$162.40 ▼ 2.10%</b></span>
+      <!-- duplicated for seamless loop -->
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html">
+        <span class="brand__dot"></span>Money Market
+        <span class="brand__tag">est. 2026</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html" class="active">Home</a>
+        <a href="etfs.html">ETFs</a>
+        <a href="stocks.html">Stocks</a>
+        <a href="crypto.html">Crypto</a>
+        <a href="tools.html">Tools</a>
+        <a href="about.html">About</a>
+      </nav>
+      <a class="btn" href="#newsletter">Subscribe</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="wrap hero">
+    <div class="hero__eyebrow">Tuesday Tape · May 20, 2026</div>
+    <h1 class="hero__title">Markets, explained <em>like a friend</em> who actually knows.</h1>
+    <p class="hero__lede">
+      Money Market is a twice-weekly read about ETFs, stocks, and crypto — written for
+      people who want to <em>actually understand</em> what's happening, not just nod along.
+      No jargon walls. No financial-influencer shouting. Just the takes you'd want from a smart friend
+      who reads the 10-Ks so you don't have to.
+    </p>
+    <div class="hero__meta">
+      <span>New issues Tuesday &amp; Friday</span>
+      <span>·</span>
+      <a href="#newsletter">Get it in your inbox →</a>
+    </div>
+  </section>
+
+  <!-- MARKET SNAPSHOT -->
+  <section class="wrap section section--tight">
+    <div class="snapshot">
+      <div class="snapshot__head">
+        <h3>The Tape · close of business</h3>
+        <span>Sample data · 20 May 2026</span>
+      </div>
+      <div class="snap">
+        <div class="snap__label">S&amp;P 500</div>
+        <div class="snap__price">5,418.22</div>
+        <div class="snap__delta up">▲ +33.61 (+0.62%)</div>
+      </div>
+      <div class="snap">
+        <div class="snap__label">Nasdaq 100</div>
+        <div class="snap__price">19,604.18</div>
+        <div class="snap__delta up">▲ +176.40 (+0.91%)</div>
+      </div>
+      <div class="snap">
+        <div class="snap__label">10-Yr Treasury</div>
+        <div class="snap__price">4.38%</div>
+        <div class="snap__delta down">▼ −3 bps</div>
+      </div>
+      <div class="snap">
+        <div class="snap__label">Bitcoin</div>
+        <div class="snap__price">$67,402</div>
+        <div class="snap__delta up">▲ +1.30%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LATEST -->
+  <section class="wrap section">
+    <div class="section__head">
+      <h2 class="section__title">This week's reads <small>// LATEST</small></h2>
+      <a class="section__more" href="#archive">Full archive →</a>
+    </div>
+
+    <div class="grid grid--2">
+      <article class="card card--feature">
+        <span class="card__chip">Recap · Tuesday Tape</span>
+        <h3 class="card__title"><a href="articles/tuesdays-tape.html">Tuesday's Tape: tech does the heavy lifting, retail goes quiet</a></h3>
+        <p class="card__dek">
+          Nvidia carried the index again, the small-cap rally took a coffee break, and a sleepy
+          stablecoin headline is doing more work than it looks. Five things that mattered, in plain English.
+        </p>
+        <div class="card__meta">May 20 · 6 min read</div>
+      </article>
+
+      <div class="grid">
+        <article class="card">
+          <span class="card__chip card__chip--etf">ETFs</span>
+          <h3 class="card__title"><a href="articles/covered-call-etfs.html">What the hell is a covered-call ETF, and why is everyone buying them?</a></h3>
+          <p class="card__dek">JEPI, JEPQ, QYLD — the "monthly income" pitch sounds amazing. Here's what you're actually trading away.</p>
+          <div class="card__meta">May 16 · 8 min read</div>
+        </article>
+        <article class="card">
+          <span class="card__chip card__chip--stocks">Stocks</span>
+          <h3 class="card__title"><a href="articles/nvidia-earnings.html">Nvidia's earnings: the five numbers that actually matter</a></h3>
+          <p class="card__dek">Forget the headline beat. The story is in data-center growth, gross margin, and one quiet line in the guidance.</p>
+          <div class="card__meta">May 13 · 7 min read</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORIES -->
+  <section class="wrap section">
+    <div class="section__head">
+      <h2 class="section__title">By topic <small>// PILLARS</small></h2>
+    </div>
+    <div class="grid grid--3">
+      <article class="card">
+        <span class="card__chip card__chip--crypto">Crypto</span>
+        <h3 class="card__title"><a href="articles/stablecoins.html">Stablecoins, demystified: what makes them stable (and what makes them not)</a></h3>
+        <p class="card__dek">USDC, USDT, DAI, and the algorithmic dumpster fires. A field guide to the dollar's weird digital cousins.</p>
+        <div class="card__meta">May 9 · 9 min read</div>
+      </article>
+      <article class="card">
+        <span class="card__chip card__chip--plain">Plain English</span>
+        <h3 class="card__title"><a href="articles/first-1000.html">Your first $1,000: a no-shame guide to actually starting</a></h3>
+        <p class="card__dek">No "buy this hot stock." Just a real, boring, surprisingly effective plan for the money that's been sitting in your checking account.</p>
+        <div class="card__meta">May 6 · 11 min read</div>
+      </article>
+      <article class="card">
+        <span class="card__chip card__chip--stocks">Stocks</span>
+        <h3 class="card__title"><a href="articles/sixty-forty-vibes.html">The "death of the 60/40 portfolio" is mostly vibes</a></h3>
+        <p class="card__dek">2022 broke a lot of brains. The math, post-mortemed: what actually happened, and why the obituary was premature.</p>
+        <div class="card__meta">May 2 · 6 min read</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER -->
+  <section class="wrap section section--tight" id="newsletter">
+    <div class="newsletter">
+      <div>
+        <h3>Twice a week. Ten minutes. No yelling.</h3>
+        <p>The Tuesday Tape recaps what mattered. The Friday Wrap goes deeper on one story. Free, no upsells, easy to unsubscribe.</p>
+      </div>
+      <div class="beehiiv-embed">
+        <script async src="https://subscribe-forms.beehiiv.com/v3/loader.js" data-beehiiv-form="59157cc8-a5b9-41ae-bf1d-0d9bd7d97d6d"></script>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHIVE TEASER -->
+  <section class="wrap section" id="archive">
+    <div class="section__head">
+      <h2 class="section__title">From the archive <small>// 2026</small></h2>
+      <a class="section__more" href="etfs.html">Browse ETFs →</a>
+    </div>
+    <div class="grid grid--4">
+      <article class="card">
+        <span class="card__chip card__chip--etf">ETFs</span>
+        <h3 class="card__title"><a href="etfs.html">VOO vs SPY vs IVV: yes, it matters which S&amp;P fund you pick</a></h3>
+        <div class="card__meta">Apr 25 · 5 min</div>
+      </article>
+      <article class="card">
+        <span class="card__chip card__chip--crypto">Crypto</span>
+        <h3 class="card__title"><a href="crypto.html">Ethereum's "blob" upgrade, finally explained without the jargon</a></h3>
+        <div class="card__meta">Apr 22 · 7 min</div>
+      </article>
+      <article class="card">
+        <span class="card__chip card__chip--stocks">Stocks</span>
+        <h3 class="card__title"><a href="stocks.html">Costco's stock is "too expensive." It's been "too expensive" for a decade.</a></h3>
+        <div class="card__meta">Apr 18 · 6 min</div>
+      </article>
+      <article class="card">
+        <span class="card__chip card__chip--plain">Plain English</span>
+        <h3 class="card__title"><a href="articles/first-1000.html">How a 401(k) match actually works (and why "free money" undersells it)</a></h3>
+        <div class="card__meta">Apr 15 · 8 min</div>
+      </article>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="index.html"><span class="brand__dot"></span>Money Market</a>
+        <p>Twice-weekly market reads for people who want to understand the money, not just chase it.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Topics</h4>
+        <ul>
+          <li><a href="etfs.html">ETFs</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="crypto.html">Crypto</a></li>
+          <li><a href="tools.html">Tools</a></li>
+          <li><a href="#">Plain English</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The publication</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#voice">How we write</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+          <li><a href="#newsletter">Newsletter</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The fine print</h4>
+        <ul>
+          <li><a href="about.html#disclosure">Disclosure</a></li>
+          <li><a href="about.html#methodology">How we source</a></li>
+          <li><a href="about.html#corrections">Corrections</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap footer__legal">
+      <span>© 2026 Money Market. Nothing here is investment advice.</span>
+      <span>Made for people, not portfolios.</span>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ETF Overlap Tool — Money Market</title>
+  <meta name="description" content="Are your ETFs secretly the same ETF? See how much your funds overlap — and where to actually diversify.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ---------- Tool switcher (sibling nav) ---------- */
+    .tool-switch {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .tool-switch a {
+      font-family: var(--mono);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--rule);
+      background: var(--paper);
+      color: var(--ink-soft);
+    }
+    .tool-switch a:hover { color: var(--mint-deep); border-color: var(--mint); }
+    .tool-switch a.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+    /* ---------- ETF picker ---------- */
+    .picker {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 18px;
+      background: var(--paper-2);
+      border: 1px solid var(--rule);
+      border-radius: 18px;
+      padding: 26px;
+    }
+    @media (max-width: 760px) {
+      .picker { grid-template-columns: 1fr; }
+      .picker .vs { justify-self: center; }
+    }
+    .picker__col h4 {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--mint-deep);
+      margin: 0 0 8px;
+    }
+    .picker select {
+      width: 100%;
+      padding: 14px 16px;
+      font: inherit;
+      font-family: var(--mono);
+      font-size: 16px;
+      color: var(--ink);
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .picker select:focus { outline: 2px solid var(--mint); }
+    .picker .vs {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: 22px;
+      color: var(--slate);
+      text-align: center;
+    }
+    .picker__meta {
+      font-size: 13px;
+      color: var(--slate);
+      margin-top: 8px;
+      font-family: var(--mono);
+      letter-spacing: .04em;
+    }
+
+    /* ---------- Big result ---------- */
+    .overlap-hero {
+      background: var(--ink); color: var(--paper);
+      border-radius: 18px;
+      padding: 32px;
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 32px;
+      align-items: center;
+    }
+    @media (max-width: 800px) {
+      .overlap-hero { grid-template-columns: 1fr; }
+    }
+    .overlap-hero .big {
+      font-family: var(--display);
+      font-weight: 800;
+      font-size: clamp(72px, 12vw, 128px);
+      line-height: 1;
+      color: var(--mint);
+      letter-spacing: -.04em;
+    }
+    .overlap-hero .big .pct { color: var(--paper); font-size: .5em; vertical-align: 14%; margin-left: 4px; font-weight: 600; }
+    .overlap-hero .label {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #8c98ad;
+      margin-bottom: 12px;
+    }
+    .overlap-hero h2 {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 28px;
+      margin: 0 0 12px;
+      letter-spacing: -.01em;
+    }
+    .overlap-hero p {
+      color: #c7cfdd;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.55;
+    }
+    .verdict-chip {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+      background: rgba(43,212,169,.18);
+      color: var(--mint);
+    }
+    .verdict-chip.warn { background: rgba(255,107,92,.18); color: #FF9A8E; }
+    .verdict-chip.med  { background: rgba(224,177,74,.22); color: #F5C764; }
+
+    /* ---------- Venn visual ---------- */
+    .venn-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 24px;
+      margin-top: 28px;
+    }
+    .venn-card h3 {
+      font-family: var(--display);
+      font-weight: 600;
+      font-size: 20px;
+      margin: 0 0 4px;
+    }
+    .venn-card .chart-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--slate);
+      margin-bottom: 18px;
+    }
+    .venn-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
+    @media (max-width: 700px) { .venn-wrap { grid-template-columns: 1fr; } }
+    .venn-wrap svg { width: 100%; height: auto; max-width: 420px; margin: 0 auto; display: block; }
+
+    .stack-bar {
+      width: 100%;
+      height: 28px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      border: 1px solid var(--rule);
+      margin-top: 14px;
+    }
+    .stack-bar div {
+      height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: 11px; color: var(--paper);
+      transition: width .25s ease;
+      white-space: nowrap; overflow: hidden;
+    }
+    .stack-only-a { background: #4339A1; }
+    .stack-shared { background: var(--mint-deep); }
+    .stack-only-b { background: #B5382B; }
+    .stack-legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: var(--ink-soft); }
+    .stack-legend span { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12px; }
+    .stack-legend .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* ---------- Shared holdings table ---------- */
+    .shared-card {
+      background: var(--paper);
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 6px 22px 22px;
+      margin-top: 28px;
+      overflow-x: auto;
+    }
+    .shared-card h3 {
+      font-family: var(--display); font-weight: 600;
+      font-size: 20px; margin: 18px 0 6px;
+    }
+    .shared-card .chart-sub {
+      font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--slate); margin-bottom: 14px;
+    }
+    .shared-card table { width: 100%; border-collapse: collapse; }
+    .shared-card th, .shared-card td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--rule);
+      font-family: var(--mono); font-size: 14px;
+    }
+    .shared-card th {
+      font-size: 11px; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--slate); font-weight: 600;
+      border-bottom: 2px solid var(--ink);
+      text-align: left;
+    }
+    .shared-card td.num { text-align: right; }
+    .shared-card th.num { text-align: right; }
+    .shared-card tbody tr:hover { background: var(--paper-2); }
+    .shared-card .ticker { font-weight: 600; color: var(--ink); }
+    .shared-card .empty-row td { text-align: center; color: var(--slate); padding: 28px 0; }
+
+    /* ---------- Explainer ---------- */
+    .explainer {
+      background: var(--paper-2);
+      border-left: 4px solid var(--mint);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-top: 36px;
+    }
+    .explainer__label {
+      font-family: var(--mono); font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--mint-deep); margin-bottom: 8px; display: block;
+    }
+    .explainer h3 {
+      font-family: var(--display); font-weight: 700;
+      font-size: 22px; margin: 0 0 10px; letter-spacing: -.01em;
+    }
+    .explainer p { color: var(--ink-soft); margin: 0 0 12px; font-size: 16px; }
+    .explainer p:last-child { margin-bottom: 0; }
+    .explainer .formula {
+      font-family: var(--mono); font-size: 13px; color: var(--ink-soft);
+      background: var(--paper); border: 1px solid var(--rule);
+      padding: 10px 14px; border-radius: 8px; display: inline-block; margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mock ticker -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+      <span>JEPI <b class="flat">$57.21 ◆ 0.02%</b></span>
+      <span>SCHD <b class="up">$28.94 ▲ 0.21%</b></span>
+      <span>VOO <b class="up">$498.10 ▲ 0.59%</b></span>
+      <span>SOL <b class="down">$162.40 ▼ 2.10%</b></span>
+      <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
+      <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
+      <span>VTI <b class="up">$268.55 ▲ 0.48%</b></span>
+      <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
+      <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
+      <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
+      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
+      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html">
+        <span class="brand__dot"></span>Money Market
+        <span class="brand__tag">est. 2026</span>
+      </a>
+      <nav class="nav__links">
+        <a href="index.html">Home</a>
+        <a href="etfs.html">ETFs</a>
+        <a href="stocks.html">Stocks</a>
+        <a href="crypto.html">Crypto</a>
+        <a href="tools.html" class="active">Tools</a>
+        <a href="about.html">About</a>
+      </nav>
+      <a class="btn" href="index.html#newsletter">Subscribe</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="category-hero">
+    <div class="wrap">
+      <span class="chip">Tools // ETF Overlap</span>
+      <h1>Are your ETFs <em style="font-style: italic; color: var(--mint-deep);">secretly the same ETF?</em></h1>
+      <p>
+        Pick two funds. We'll show you how much they actually share — by weight, not just by ticker count —
+        so "diversifying" doesn't quietly turn into buying Apple, Microsoft, and Nvidia three times.
+      </p>
+    </div>
+  </section>
+
+  <!-- Tool body -->
+  <section class="wrap section">
+
+    <!-- Sibling tool switcher -->
+    <div class="tool-switch">
+      <a href="tools.html">Compound growth</a>
+      <a href="etf-overlap.html" class="active">ETF overlap</a>
+    </div>
+
+    <!-- Picker -->
+    <div class="picker">
+      <div class="picker__col">
+        <h4>ETF A</h4>
+        <select id="etf-a"></select>
+        <div class="picker__meta" id="meta-a"></div>
+      </div>
+      <div class="vs">vs.</div>
+      <div class="picker__col">
+        <h4>ETF B</h4>
+        <select id="etf-b"></select>
+        <div class="picker__meta" id="meta-b"></div>
+      </div>
+    </div>
+
+    <!-- Big result -->
+    <div class="overlap-hero">
+      <div>
+        <div class="big"><span id="overlap-pct">0</span><span class="pct">%</span></div>
+        <div class="label">Weight-based overlap</div>
+      </div>
+      <div>
+        <span class="verdict-chip" id="verdict-chip">Calculating</span>
+        <h2 id="verdict-title">—</h2>
+        <p id="verdict-body">—</p>
+      </div>
+    </div>
+
+    <!-- Venn visual + stacked bar -->
+    <div class="venn-card">
+      <h3>The visual</h3>
+      <div class="chart-sub">Circle size = number of holdings · Overlap area scales with shared weight</div>
+      <div class="venn-wrap">
+        <svg id="venn" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid meet" aria-label="ETF overlap Venn diagram"></svg>
+        <div>
+          <div style="font-family: var(--mono); font-size: 12px; color: var(--slate); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px;">
+            Shared vs. unique exposure
+          </div>
+          <div class="stack-bar" id="stack-bar"></div>
+          <div class="stack-legend">
+            <span><i class="sw stack-only-a"></i> Unique to <b id="leg-a">A</b> · <span id="leg-a-val">0%</span></span>
+            <span><i class="sw stack-shared"></i> Shared · <span id="leg-shared-val">0%</span></span>
+            <span><i class="sw stack-only-b"></i> Unique to <b id="leg-b">B</b> · <span id="leg-b-val">0%</span></span>
+          </div>
+          <p style="font-size: 13px; color: var(--slate); margin-top: 18px; line-height: 1.5;">
+            "Shared" is the weight that lands in the same names in both funds. Higher = more of your money
+            doing the same job twice. <em>How much of my money is doing the same job twice?</em>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shared holdings -->
+    <div class="shared-card">
+      <h3>Shared holdings</h3>
+      <div class="chart-sub" id="shared-sub">Sorted by combined weight</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Ticker</th>
+            <th class="num">Weight in A</th>
+            <th class="num">Weight in B</th>
+            <th class="num">Overlap contribution</th>
+          </tr>
+        </thead>
+        <tbody id="shared-body"></tbody>
+      </table>
+    </div>
+
+    <!-- Explainer -->
+    <div class="explainer">
+      <span class="explainer__label">Plain English</span>
+      <h3>How to read this</h3>
+      <p>
+        <strong>Under 25%</strong> overlap is genuine diversification — you're buying meaningfully different things.
+        <strong>25–60%</strong> means there's real redundancy: some of your "second" ETF is just buying what your first ETF already owns.
+        <strong>Over 60%</strong>? You're effectively holding one fund in a trench coat.
+      </p>
+      <p>
+        The classic trap: VOO + VTI + QQQ feels like three funds, but they share most of their top-10 holdings —
+        which means your top-10 holdings just got 2-3× the concentration you thought.
+      </p>
+      <p>
+        The formula, for the formula-curious:
+        <span class="formula">Overlap % = Σ min(w<sub>A</sub>, w<sub>B</sub>) ÷ min(ΣA, ΣB)</span>
+      </p>
+      <p style="font-size: 13px; color: var(--slate); margin-top: 14px;">
+        Heads up: this tool uses the top ~25 holdings of each fund (approximate weights from recent public
+        filings) and normalizes against those. It's a directional gut-check, not a portfolio audit —
+        real funds hold hundreds of names whose weights shift daily. Nothing here is investment advice.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="wrap footer__grid">
+      <div class="footer__brand">
+        <a class="brand" href="index.html"><span class="brand__dot"></span>Money Market</a>
+        <p>Twice-weekly market reads for people who want to understand the money, not just chase it.</p>
+      </div>
+      <div class="footer__col">
+        <h4>Topics</h4>
+        <ul>
+          <li><a href="etfs.html">ETFs</a></li>
+          <li><a href="stocks.html">Stocks</a></li>
+          <li><a href="crypto.html">Crypto</a></li>
+          <li><a href="tools.html">Tools</a></li>
+          <li><a href="#">Plain English</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The publication</h4>
+        <ul>
+          <li><a href="about.html">About us</a></li>
+          <li><a href="about.html#voice">How we write</a></li>
+          <li><a href="about.html#contact">Contact</a></li>
+          <li><a href="index.html#newsletter">Newsletter</a></li>
+        </ul>
+      </div>
+      <div class="footer__col">
+        <h4>The fine print</h4>
+        <ul>
+          <li><a href="about.html#disclosure">Disclosure</a></li>
+          <li><a href="about.html#methodology">How we source</a></li>
+          <li><a href="about.html#corrections">Corrections</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="wrap footer__legal">
+      <span>© 2026 Money Market. Nothing here is investment advice.</span>
+      <span>Made for people, not portfolios.</span>
+    </div>
+  </footer>
+
+<script>
+(function(){
+  // -------- Data: approximate top holdings & weights for popular ETFs --------
+  // Weights are illustrative percentages of fund. Sourced from recent public
+  // holdings disclosures — drift daily, treat as directional.
+  const ETFS = {
+    VOO: { name: "Vanguard S&P 500", category: "US Large Cap (S&P 500)", holdings: {
+      MSFT:7.0, AAPL:6.9, NVDA:6.6, AMZN:3.7, META:2.4, GOOGL:2.0, GOOG:1.7, BRK_B:1.7, AVGO:1.6, TSLA:1.5,
+      LLY:1.3, JPM:1.3, UNH:1.2, XOM:1.1, V:1.0, MA:0.9, PG:0.8, JNJ:0.8, COST:0.8, HD:0.7,
+      ABBV:0.7, MRK:0.7, WMT:0.7, NFLX:0.7, BAC:0.6
+    }},
+    IVV: { name: "iShares Core S&P 500", category: "US Large Cap (S&P 500)", holdings: {
+      MSFT:7.0, AAPL:6.9, NVDA:6.6, AMZN:3.7, META:2.4, GOOGL:2.0, GOOG:1.7, BRK_B:1.7, AVGO:1.6, TSLA:1.5,
+      LLY:1.3, JPM:1.3, UNH:1.2, XOM:1.1, V:1.0, MA:0.9, PG:0.8, JNJ:0.8, COST:0.8, HD:0.7,
+      ABBV:0.7, MRK:0.7, WMT:0.7, NFLX:0.7, BAC:0.6
+    }},
+    SPY: { name: "SPDR S&P 500", category: "US Large Cap (S&P 500)", holdings: {
+      MSFT:7.0, AAPL:6.9, NVDA:6.6, AMZN:3.7, META:2.4, GOOGL:2.0, GOOG:1.7, BRK_B:1.7, AVGO:1.6, TSLA:1.5,
+      LLY:1.3, JPM:1.3, UNH:1.2, XOM:1.1, V:1.0, MA:0.9, PG:0.8, JNJ:0.8, COST:0.8, HD:0.7,
+      ABBV:0.7, MRK:0.7, WMT:0.7, NFLX:0.7, BAC:0.6
+    }},
+    VTI: { name: "Vanguard Total US Stock Market", category: "US Total Market", holdings: {
+      MSFT:6.2, AAPL:6.1, NVDA:5.8, AMZN:3.3, META:2.1, GOOGL:1.7, GOOG:1.5, BRK_B:1.5, AVGO:1.4, TSLA:1.3,
+      LLY:1.1, JPM:1.1, UNH:1.0, XOM:0.9, V:0.9, MA:0.8, PG:0.7, JNJ:0.7, COST:0.7, HD:0.6,
+      ABBV:0.6, MRK:0.6, WMT:0.6, NFLX:0.6, BAC:0.5
+    }},
+    QQQ: { name: "Invesco QQQ (Nasdaq-100)", category: "US Large Cap Growth (Nasdaq)", holdings: {
+      AAPL:8.9, MSFT:8.2, NVDA:8.0, AMZN:5.4, META:5.0, AVGO:4.8, GOOGL:2.7, GOOG:2.6, TSLA:3.2, COST:2.6,
+      NFLX:2.2, ADBE:1.5, PEP:1.5, AMD:1.3, LIN:1.3, TMUS:1.3, CSCO:1.2, INTU:1.2, QCOM:1.1, TXN:1.1,
+      ISRG:1.0, AMGN:1.0, BKNG:1.0, AMAT:0.9, HON:0.8
+    }},
+    VUG: { name: "Vanguard Growth", category: "US Large Cap Growth", holdings: {
+      AAPL:11.4, MSFT:11.1, NVDA:10.6, AMZN:6.0, META:4.0, GOOGL:3.4, GOOG:2.8, TSLA:2.4, LLY:2.1, AVGO:2.6,
+      V:1.7, MA:1.5, COST:1.4, HD:1.2, NFLX:1.1, ADBE:0.9, AMD:0.8, CRM:0.8, QCOM:0.7, TMUS:0.7
+    }},
+    VTV: { name: "Vanguard Value", category: "US Large Cap Value", holdings: {
+      BRK_B:3.4, JPM:2.7, XOM:2.3, UNH:2.1, JNJ:2.0, PG:1.8, V:1.7, WMT:1.6, BAC:1.4, ABBV:1.5,
+      CVX:1.3, MRK:1.4, ORCL:1.2, KO:1.1, WFC:1.0, GE:0.9, IBM:0.8, CSCO:1.0, ABT:0.9, ACN:0.8
+    }},
+    SCHD: { name: "Schwab US Dividend Equity", category: "US Dividend", holdings: {
+      CSCO:4.4, ABBV:4.3, TXN:4.2, HD:4.1, CVX:4.0, KO:3.9, PEP:3.8, VZ:3.7, BMY:3.6, AMGN:3.5,
+      LMT:3.3, PFE:3.0, USB:2.7, COP:2.6, BLK:2.4, MO:2.3, KMB:2.0, GIS:1.9, FAST:1.8, ADP:1.7
+    }},
+    VYM: { name: "Vanguard High Dividend Yield", category: "US Dividend", holdings: {
+      JPM:3.6, AVGO:3.2, XOM:2.7, JNJ:2.4, PG:2.3, HD:2.0, ABBV:1.9, WMT:1.7, BAC:1.6, MRK:1.5,
+      CVX:1.4, KO:1.3, PEP:1.2, CSCO:1.2, ORCL:1.1, ABT:1.0, MCD:0.9, VZ:0.9, T:0.8, IBM:0.8
+    }},
+    JEPI: { name: "JPMorgan Equity Premium Income", category: "Covered Call Income", holdings: {
+      MA:1.7, V:1.6, PG:1.6, AMZN:1.5, ABBV:1.5, MSFT:1.5, NVDA:1.4, AAPL:1.4, UNH:1.3, COST:1.3,
+      META:1.2, GOOGL:1.1, LLY:1.0, HD:1.0, JNJ:0.9, MRK:0.9, INTU:0.9, ACN:0.9, PEP:0.9, ABT:0.8
+    }},
+    JEPQ: { name: "JPMorgan Nasdaq Equity Premium", category: "Covered Call Income (Nasdaq)", holdings: {
+      AAPL:5.6, MSFT:5.3, NVDA:5.1, AMZN:3.6, META:3.2, AVGO:3.0, GOOGL:1.8, GOOG:1.7, TSLA:2.0, COST:1.7,
+      NFLX:1.5, ADBE:1.0, AMD:0.9, INTU:0.8, PEP:0.8, CSCO:0.8, QCOM:0.7, LIN:0.7, TMUS:0.7, TXN:0.7
+    }},
+    ARKK: { name: "ARK Innovation", category: "Disruptive Innovation", holdings: {
+      TSLA:10.5, COIN:9.4, ROKU:7.5, PLTR:6.5, RBLX:6.1, CRSP:5.4, PATH:4.7, DKNG:4.5, U:4.1, ROBO:3.5,
+      HOOD:3.2, TWLO:3.1, SHOP:2.9, BEAM:2.8, NTLA:2.6, EXAS:2.4, TDOC:2.3, ZM:2.0, PACB:1.8, IRBT:1.5
+    }},
+    IWM: { name: "iShares Russell 2000 (Small Cap)", category: "US Small Cap", holdings: {
+      SMCI:0.8, MSTR:0.5, FTAI:0.4, IONS:0.3, MLI:0.3, ELF:0.3, FIX:0.3, RHP:0.3, BMI:0.3, ANF:0.3,
+      ATI:0.2, FN:0.2, MOG_A:0.2, HALO:0.2, ESNT:0.2, COMM:0.2, EAT:0.2, ONTO:0.2, GTLS:0.2, SPSC:0.2
+    }},
+    AVUV: { name: "Avantis US Small Cap Value", category: "US Small Cap Value", holdings: {
+      MUR:0.8, EME:0.7, BCC:0.7, M:0.7, JBLU:0.6, UNFI:0.6, RYAM:0.6, GT:0.6, SLM:0.6, COOP:0.6,
+      WSM:0.5, ATKR:0.5, NMIH:0.5, VC:0.5, OSK:0.5, GFF:0.5, AMR:0.5, BTU:0.4, KSS:0.4, BCO:0.4
+    }},
+    VXUS: { name: "Vanguard Total International Stock", category: "International Total", holdings: {
+      TSM:2.3, NESN:1.0, NOVN:0.9, ASML:0.8, AZN:0.8, SAP:0.7, NOVO_B:0.7, MC:0.7, SHEL:0.6, RY:0.5,
+      HSBC:0.5, TM:0.5, SONY:0.5, RHHBY:0.5, BHP:0.5, COMM_AB:0.4, CBA:0.4, ULVR:0.4, SIE:0.4, BABA:0.4
+    }},
+    BND: { name: "Vanguard Total Bond Market", category: "US Bonds", holdings: {
+      UST_BOND_1:5.0, UST_BOND_2:4.5, UST_BOND_3:4.0, UST_BOND_4:3.5, UST_BOND_5:3.2
+    }}
+  };
+
+  const ORDER = ["VOO","IVV","SPY","VTI","QQQ","VUG","VTV","SCHD","VYM","JEPI","JEPQ","ARKK","IWM","AVUV","VXUS","BND"];
+
+  // -------- Helpers --------
+  const $ = (id) => document.getElementById(id);
+  const sum = (arr) => arr.reduce((a,b)=>a+b,0);
+
+  function fillSelects() {
+    const sa = $('etf-a'), sb = $('etf-b');
+    ORDER.forEach(t => {
+      const e = ETFS[t];
+      const optA = new Option(t + " — " + e.name, t);
+      const optB = new Option(t + " — " + e.name, t);
+      sa.add(optA);
+      sb.add(optB);
+    });
+    sa.value = "VOO";
+    sb.value = "QQQ";
+  }
+
+  function tickerLabel(t) { return t.replace(/_/g,'.'); }
+
+  function computeOverlap(aKey, bKey) {
+    const A = ETFS[aKey].holdings;
+    const B = ETFS[bKey].holdings;
+    const shared = [];
+    for (const t in A) {
+      if (B[t] != null) {
+        shared.push({ t, a: A[t], b: B[t], overlap: Math.min(A[t], B[t]) });
+      }
+    }
+    shared.sort((x,y) => (y.a + y.b) - (x.a + x.b));
+    const rawOverlap = sum(shared.map(s => s.overlap));
+    const totalA = sum(Object.values(A));
+    const totalB = sum(Object.values(B));
+    // Normalize against the smaller fund's listed weight so identical funds
+    // read as ~100% even though our dataset only covers their top-N holdings.
+    // This matches how consumer ETF overlap tools express the result.
+    const denom = Math.max(0.0001, Math.min(totalA, totalB));
+    const overlapPct = Math.min(100, (rawOverlap / denom) * 100);
+    return { shared, overlapPct, rawOverlap, totalA, totalB };
+  }
+
+  function verdict(pct, sameCategory) {
+    if (pct < 5) return {
+      cls: '',
+      chip: 'Very low overlap',
+      title: 'These really are different funds.',
+      body: 'Less than 5% shared weight. Combining them adds genuine diversification — you\'re owning different parts of the market.'
+    };
+    if (pct < 25) return {
+      cls: 'med',
+      chip: 'Low overlap',
+      title: 'Mostly different — some duplication.',
+      body: 'A modest sliver does the same job in both. Fine for most portfolios; just don\'t double-count it as "two ideas."'
+    };
+    if (pct < 60) return {
+      cls: 'med',
+      chip: 'Moderate overlap',
+      title: 'Real redundancy — read the room.',
+      body: 'A meaningful chunk of one fund is just buying what the other already owns. You\'re not as diversified as the two tickers suggest.'
+    };
+    if (pct < 85) return {
+      cls: 'warn',
+      chip: 'High overlap',
+      title: 'These mostly do the same job.',
+      body: 'You\'re paying two expense ratios for largely the same exposure. Pick one, or hold both with eyes open.'
+    };
+    return {
+      cls: 'warn',
+      chip: 'Near-identical',
+      title: 'These are basically the same fund.',
+      body: 'Almost every dollar lands in the same places at the same weights. Holding both adds complexity, not diversification.'
+    };
+  }
+
+  function renderVerdict(aKey, bKey, overlapPct) {
+    const A = ETFS[aKey], B = ETFS[bKey];
+    const sameCat = A.category === B.category;
+    const v = verdict(overlapPct, sameCat);
+    $('overlap-pct').textContent = overlapPct.toFixed(1);
+    const chip = $('verdict-chip');
+    chip.textContent = v.chip;
+    chip.className = 'verdict-chip ' + v.cls;
+    $('verdict-title').textContent = v.title;
+    $('verdict-body').textContent = v.body;
+  }
+
+  function renderVenn(aKey, bKey, overlapPct) {
+    const A = ETFS[aKey], B = ETFS[bKey];
+    const svg = $('venn');
+    // Size circles by number of holdings (radius ~ sqrt(N))
+    const nA = Object.keys(A.holdings).length;
+    const nB = Object.keys(B.holdings).length;
+    const rA = 50 + 30 * Math.sqrt(nA / 25);
+    const rB = 50 + 30 * Math.sqrt(nB / 25);
+    // Distance between centers: higher overlap = closer (more visual overlap)
+    const overlapRatio = Math.min(1, overlapPct / 100);
+    const dMin = Math.abs(rA - rB) + 6;
+    const dMax = rA + rB - 4;
+    const dist = dMax - (dMax - dMin) * overlapRatio;
+
+    const cy = 130;
+    const cx = 200;
+    const cxA = cx - dist/2;
+    const cxB = cx + dist/2;
+
+    svg.innerHTML = `
+      <defs>
+        <filter id="soften" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="0.5"/>
+        </filter>
+      </defs>
+      <circle cx="${cxA}" cy="${cy}" r="${rA}" fill="#4339A1" fill-opacity="0.65" stroke="#4339A1" stroke-width="2"/>
+      <circle cx="${cxB}" cy="${cy}" r="${rB}" fill="#B5382B" fill-opacity="0.65" stroke="#B5382B" stroke-width="2"/>
+      <text x="${cxA}" y="${cy - rA - 8}" font-family="JetBrains Mono, monospace" font-size="13" fill="#0E1726" text-anchor="middle" font-weight="600">${aKey}</text>
+      <text x="${cxB}" y="${cy - rB - 8}" font-family="JetBrains Mono, monospace" font-size="13" fill="#0E1726" text-anchor="middle" font-weight="600">${bKey}</text>
+      <text x="${cxA}" y="${cy + 4}" font-family="Inter, sans-serif" font-size="11" fill="#FAF6EE" text-anchor="middle">${nA} holdings</text>
+      <text x="${cxB}" y="${cy + 4}" font-family="Inter, sans-serif" font-size="11" fill="#FAF6EE" text-anchor="middle">${nB} holdings</text>
+      ${overlapPct > 1 ? `<text x="${cx}" y="${cy + 4}" font-family="JetBrains Mono, monospace" font-size="13" fill="#FAF6EE" text-anchor="middle" font-weight="700">${overlapPct.toFixed(0)}%</text>` : ''}
+    `;
+  }
+
+  function renderStackBar(aKey, bKey, overlapPct) {
+    // Bar shows the combined picture: shared portion vs unique-to-each.
+    // pS = overlap%, with remaining (100 - overlap) split evenly as unique to each.
+    const pS = Math.max(0, Math.min(100, overlapPct));
+    const remainder = 100 - pS;
+    const pA = remainder / 2;
+    const pB = remainder / 2;
+
+    const bar = $('stack-bar');
+    bar.innerHTML = `
+      <div class="stack-only-a" style="width:${pA}%" title="Only in ${aKey}">${pA > 8 ? pA.toFixed(0) + '%' : ''}</div>
+      <div class="stack-shared" style="width:${pS}%" title="Shared">${pS > 8 ? pS.toFixed(0) + '%' : ''}</div>
+      <div class="stack-only-b" style="width:${pB}%" title="Only in ${bKey}">${pB > 8 ? pB.toFixed(0) + '%' : ''}</div>
+    `;
+    $('leg-a').textContent = aKey;
+    $('leg-b').textContent = bKey;
+    $('leg-a-val').textContent = pA.toFixed(0) + '%';
+    $('leg-shared-val').textContent = pS.toFixed(0) + '%';
+    $('leg-b-val').textContent = pB.toFixed(0) + '%';
+  }
+
+  function renderShared(aKey, bKey, shared) {
+    const body = $('shared-body');
+    $('shared-sub').textContent = shared.length + ' shared holding' + (shared.length === 1 ? '' : 's') + ' · sorted by combined weight';
+    if (shared.length === 0) {
+      body.innerHTML = `<tr class="empty-row"><td colspan="4">No overlapping holdings in our data. These funds invest in different things.</td></tr>`;
+      return;
+    }
+    let html = '';
+    shared.forEach(s => {
+      html += `<tr>
+        <td><span class="ticker">${tickerLabel(s.t)}</span></td>
+        <td class="num">${s.a.toFixed(2)}%</td>
+        <td class="num">${s.b.toFixed(2)}%</td>
+        <td class="num" style="color: var(--mint-deep);">${s.overlap.toFixed(2)}%</td>
+      </tr>`;
+    });
+    body.innerHTML = html;
+  }
+
+  function renderMeta(aKey, bKey) {
+    const A = ETFS[aKey], B = ETFS[bKey];
+    $('meta-a').textContent = A.category + ' · ' + Object.keys(A.holdings).length + ' holdings shown';
+    $('meta-b').textContent = B.category + ' · ' + Object.keys(B.holdings).length + ' holdings shown';
+  }
+
+  function update() {
+    const aKey = $('etf-a').value;
+    const bKey = $('etf-b').value;
+    const { shared, overlapPct } = computeOverlap(aKey, bKey);
+    renderMeta(aKey, bKey);
+    renderVerdict(aKey, bKey, overlapPct);
+    renderVenn(aKey, bKey, overlapPct);
+    renderStackBar(aKey, bKey, overlapPct);
+    renderShared(aKey, bKey, shared);
+  }
+
+  fillSelects();
+  $('etf-a').addEventListener('change', update);
+  $('etf-b').addEventListener('change', update);
+  update();
+})();
+</script>
+
+</body>
+</html>
