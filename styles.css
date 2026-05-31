@@ -249,12 +249,15 @@ img { max-width: 100%; display: block; }
   font: inherit; color: var(--ink);
 }
 .newsletter input:focus { outline: 2px solid var(--mint); }
-
-/* Beehiiv embed container — lives in the right column of .newsletter */
-.beehiiv-embed { width: 100%; min-height: 64px; }
-.beehiiv-embed iframe { width: 100% !important; max-width: none !important; }
-
 @media (max-width: 760px) { .newsletter { grid-template-columns: 1fr; padding: 28px; } }
+
+/* Beehiiv embed wrapper */
+.newsletter-embed {
+  background: var(--paper-2); border-radius: 18px;
+  padding: 32px 24px; max-width: 640px; margin: 0 auto;
+  display: flex; justify-content: center;
+}
+.newsletter-embed iframe { max-width: 100% !important; width: 100% !important; }
 
 /* ---------- Article ---------- */
 .article {
@@ -383,4 +386,5 @@ img { max-width: 100%; display: block; }
   padding: 56px 0 36px; border-bottom: 1px solid var(--rule);
 }
 .category-hero h1 { font-family: var(--display); font-weight: 800; font-size: clamp(40px, 5vw, 60px); letter-spacing: -.02em; margin: 0 0 10px; }
-.category-hero p { font-size: 19px; color: var(--ink-soft); max-width: 6
+.category-hero p { font-size: 19px; color: var(--ink-soft); max-width: 60ch; margin: 0; }
+.category-hero .chip { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--mint-deep); margin-bottom: 14px; }
