@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Money Market — Markets, explained like a friend who actually knows.</title>
-  <meta name="description" content="Twice-weekly takes on ETFs, stocks, and crypto for people who want to actually understand what's happening — not just nod along.">
+  <meta name="description" content="Twice-weekly takes on ETFs, stocks, and the market for people who want to actually understand what's happening — not just nod along.">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -18,12 +18,12 @@
       <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
       <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
       <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
-      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
-      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
       <span>JEPI <b class="flat">$57.21 ◆ 0.02%</b></span>
       <span>SCHD <b class="up">$28.94 ▲ 0.21%</b></span>
       <span>VOO <b class="up">$498.10 ▲ 0.59%</b></span>
-      <span>SOL <b class="down">$162.40 ▼ 2.10%</b></span>
+      <span>MSFT <b class="up">$432.85 ▲ 0.74%</b></span>
+      <span>GOOGL <b class="up">$176.40 ▲ 1.15%</b></span>
+      <span>AVGO <b class="up">$1,420.50 ▲ 3.82%</b></span>
       <!-- duplicated for seamless loop -->
       <span>SPY <b class="up">$542.18 ▲ 0.62%</b></span>
       <span>QQQ <b class="up">$478.04 ▲ 0.91%</b></span>
@@ -31,8 +31,8 @@
       <span>NVDA <b class="up">$1,184.20 ▲ 2.11%</b></span>
       <span>AAPL <b class="down">$214.66 ▼ 0.34%</b></span>
       <span>TSLA <b class="down">$172.98 ▼ 1.04%</b></span>
-      <span>BTC <b class="up">$67,402 ▲ 1.30%</b></span>
-      <span>ETH <b class="up">$3,712 ▲ 0.88%</b></span>
+      <span>MSFT <b class="up">$432.85 ▲ 0.74%</b></span>
+      <span>AVGO <b class="up">$1,420.50 ▲ 3.82%</b></span>
     </div>
   </div>
 
@@ -46,7 +46,7 @@
         <a href="index.html" class="active">Home</a>
         <a href="etfs.html">ETFs</a>
         <a href="stocks.html">Stocks</a>
-        <a href="crypto.html">Crypto</a>
+        <a href="learn.html">Learn</a>
         <a href="about.html">About</a>
       </nav>
       <a class="btn" href="#newsletter">Subscribe</a>
@@ -58,7 +58,7 @@
     <div class="hero__eyebrow" id="hero-eyebrow">Tuesday Tape · May 26, 2026</div>
     <h1 class="hero__title">Markets, explained <em>like a friend</em> who actually knows.</h1>
     <p class="hero__lede">
-      Money Market is a twice-weekly read about ETFs, stocks, and crypto — written for
+      Money Market is a twice-weekly read about ETFs, stocks, and the market — written for
       people who want to <em>actually understand</em> what's happening, not just nod along.
       No jargon walls. No financial-influencer shouting. Just the takes you'd want from a smart friend
       who reads the 10-Ks so you don't have to.
@@ -93,9 +93,41 @@
         <div class="snap__delta down">▼ −3 bps</div>
       </div>
       <div class="snap">
-        <div class="snap__label">Bitcoin</div>
-        <div class="snap__price">$67,402</div>
-        <div class="snap__delta up">▲ +1.30%</div>
+        <div class="snap__label">Russell 2000</div>
+        <div class="snap__price">2,184.45</div>
+        <div class="snap__delta up">▲ +18.20 (+0.84%)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOP MOVERS -->
+  <section class="wrap section section--tight">
+    <div class="movers">
+      <div class="movers__head">
+        <h3>Today's movers <small>// CLOSE</small></h3>
+        <span id="movers-date">Sample data · 29 May 2026</span>
+      </div>
+      <div class="movers__grid">
+        <div class="movers__col">
+          <h4 class="movers__title movers__title--up">▲ Top winners</h4>
+          <table class="movers__table">
+            <tr><td class="mt-ticker">NVDA</td><td class="mt-name">Nvidia</td><td class="mt-price">$1,184.20</td><td class="mt-change up">+5.21%</td></tr>
+            <tr><td class="mt-ticker">ARKK</td><td class="mt-name">Innovation ETF</td><td class="mt-price">$58.40</td><td class="mt-change up">+4.12%</td></tr>
+            <tr><td class="mt-ticker">AVGO</td><td class="mt-name">Broadcom</td><td class="mt-price">$1,420.50</td><td class="mt-change up">+3.82%</td></tr>
+            <tr><td class="mt-ticker">AMD</td><td class="mt-name">Advanced Micro</td><td class="mt-price">$182.95</td><td class="mt-change up">+3.24%</td></tr>
+            <tr><td class="mt-ticker">TSLA</td><td class="mt-name">Tesla</td><td class="mt-price">$267.43</td><td class="mt-change up">+2.91%</td></tr>
+          </table>
+        </div>
+        <div class="movers__col">
+          <h4 class="movers__title movers__title--down">▼ Top losers</h4>
+          <table class="movers__table">
+            <tr><td class="mt-ticker">BA</td><td class="mt-name">Boeing</td><td class="mt-price">$164.20</td><td class="mt-change down">−4.72%</td></tr>
+            <tr><td class="mt-ticker">TGT</td><td class="mt-name">Target</td><td class="mt-price">$132.50</td><td class="mt-change down">−3.55%</td></tr>
+            <tr><td class="mt-ticker">PFE</td><td class="mt-name">Pfizer</td><td class="mt-price">$28.45</td><td class="mt-change down">−2.93%</td></tr>
+            <tr><td class="mt-ticker">XLE</td><td class="mt-name">Energy ETF</td><td class="mt-price">$89.15</td><td class="mt-change down">−2.71%</td></tr>
+            <tr><td class="mt-ticker">VYM</td><td class="mt-name">High Div ETF</td><td class="mt-price">$112.30</td><td class="mt-change down">−1.84%</td></tr>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -113,7 +145,7 @@
         <h3 class="card__title"><a href="articles/tuesdays-tape.html">Tuesday's Tape: tech does the heavy lifting, retail goes quiet</a></h3>
         <p class="card__dek">
           Nvidia carried the index again, the small-cap rally took a coffee break, and a sleepy
-          stablecoin headline is doing more work than it looks. Five things that mattered, in plain English.
+          Fed minutes release is doing more work than it looks. Five things that mattered, in plain English.
         </p>
         <div class="card__meta">May 26 · 6 min read</div>
       </article>
@@ -142,10 +174,10 @@
     </div>
     <div class="grid grid--3">
       <article class="card">
-        <span class="card__chip card__chip--crypto">Crypto</span>
-        <h3 class="card__title"><a href="articles/stablecoins.html">Stablecoins, demystified: what makes them stable (and what makes them not)</a></h3>
-        <p class="card__dek">USDC, USDT, DAI, and the algorithmic dumpster fires. A field guide to the dollar's weird digital cousins.</p>
-        <div class="card__meta">May 9 · 9 min read</div>
+        <span class="card__chip card__chip--etf">ETFs</span>
+        <h3 class="card__title"><a href="articles/covered-call-etfs.html">Covered-call ETFs: JEPI, JEPQ, and the income trade everyone gets slightly wrong</a></h3>
+        <p class="card__dek">JEPI yields almost 8%. It's also being slightly miscategorized in every "high-yield" YouTube video. Here's what it actually is.</p>
+        <div class="card__meta">May 16 · 8 min read</div>
       </article>
       <article class="card">
         <span class="card__chip card__chip--plain">Plain English</span>
@@ -182,9 +214,9 @@
         <div class="card__meta">Apr 25 · 5 min</div>
       </article>
       <article class="card">
-        <span class="card__chip card__chip--crypto">Crypto</span>
-        <h3 class="card__title"><a href="crypto.html">Ethereum's "blob" upgrade, finally explained without the jargon</a></h3>
-        <div class="card__meta">Apr 22 · 7 min</div>
+        <span class="card__chip card__chip--etf">ETFs</span>
+        <h3 class="card__title"><a href="etfs.html">Why "expense ratio" matters more than your favorite ETF brand</a></h3>
+        <div class="card__meta">Apr 22 · 5 min</div>
       </article>
       <article class="card">
         <span class="card__chip card__chip--stocks">Stocks</span>
@@ -211,7 +243,7 @@
         <ul>
           <li><a href="etfs.html">ETFs</a></li>
           <li><a href="stocks.html">Stocks</a></li>
-          <li><a href="crypto.html">Crypto</a></li>
+          <li><a href="learn.html">Learn</a></li>
           <li><a href="#">Plain English</a></li>
         </ul>
       </div>
