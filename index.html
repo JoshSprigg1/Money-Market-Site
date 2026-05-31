@@ -55,7 +55,7 @@
 
   <!-- HERO -->
   <section class="wrap hero">
-    <div class="hero__eyebrow">Tuesday Tape · May 20, 2026</div>
+    <div class="hero__eyebrow" id="hero-eyebrow">Tuesday Tape · May 26, 2026</div>
     <h1 class="hero__title">Markets, explained <em>like a friend</em> who actually knows.</h1>
     <p class="hero__lede">
       Money Market is a twice-weekly read about ETFs, stocks, and crypto — written for
@@ -75,7 +75,7 @@
     <div class="snapshot">
       <div class="snapshot__head">
         <h3>The Tape · close of business</h3>
-        <span>Sample data · 20 May 2026</span>
+        <span id="snapshot-date">Sample data · 29 May 2026</span>
       </div>
       <div class="snap">
         <div class="snap__label">S&amp;P 500</div>
@@ -115,7 +115,7 @@
           Nvidia carried the index again, the small-cap rally took a coffee break, and a sleepy
           stablecoin headline is doing more work than it looks. Five things that mattered, in plain English.
         </p>
-        <div class="card__meta">May 20 · 6 min read</div>
+        <div class="card__meta">May 26 · 6 min read</div>
       </article>
 
       <div class="grid">
@@ -239,5 +239,33 @@
     </div>
   </footer>
 
+  <script>
+    // Auto-update the Tuesday Tape eyebrow and snapshot date
+    (function() {
+      var today = new Date();
+      var dow = today.getDay(); // 0=Sun, 1=Mon, 2=Tue, ..., 5=Fri, 6=Sat
+
+      // Most recent Tuesday (today if today is Tuesday)
+      var tuesOffset = (dow - 2 + 7) % 7;
+      var tuesday = new Date(today);
+      tuesday.setDate(today.getDate() - tuesOffset);
+
+      // Most recent Friday close (today if today is Friday, otherwise previous Friday)
+      var friOffset = (dow - 5 + 7) % 7;
+      var friday = new Date(today);
+      friday.setDate(today.getDate() - friOffset);
+
+      var heroEl = document.getElementById('hero-eyebrow');
+      if (heroEl) {
+        heroEl.textContent = 'Tuesday Tape · ' +
+          tuesday.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      }
+      var snapEl = document.getElementById('snapshot-date');
+      if (snapEl) {
+        snapEl.textContent = 'Sample data · ' +
+          friday.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+    })();
+  </script>
 </body>
 </html>
